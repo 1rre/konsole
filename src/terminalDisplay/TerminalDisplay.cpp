@@ -2694,6 +2694,13 @@ QVariant TerminalDisplay::inputMethodQuery(Qt::InputMethodQuery query) const
 {
     const QPoint cursorPos = cursorPosition();
     switch (query) {
+#ifdef Q_OS_MACOS
+    case Qt::ImEnabled:
+        if ((QGuiApplication::queryKeyboardModifiers() & Qt::MetaModifier) != 0U) {
+            return false;
+        }
+        break;
+#endif
     case Qt::ImCursorRectangle:
         return imageToWidget(QRect(cursorPos.x(), cursorPos.y(), 1, 1));
     case Qt::ImFont:

@@ -1661,6 +1661,16 @@ void Session::setKittyKeyboardEnabled(bool enabled)
     }
 }
 
+#ifdef Q_OS_MACOS
+void Session::setOptionKeySendsMeta(bool left, bool right)
+{
+    auto *vt102 = qobject_cast<Vt102Emulation *>(_emulation);
+    if (vt102) {
+        vt102->setOptionKeySendsMeta(left, right);
+    }
+}
+#endif
+
 bool Session::flowControlEnabled() const
 {
     if (_shellProcess != nullptr) {

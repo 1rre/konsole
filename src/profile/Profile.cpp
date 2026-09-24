@@ -118,6 +118,8 @@ const std::vector<Profile::PropertyInfo> Profile::DefaultProperties = {
 // Keyboard
 #ifdef Q_OS_MACOS
     {KeyBindings, "KeyBindings", KEYBOARD_GROUP, QLatin1String("macos")},
+    {LeftOptionSendsMeta, "LeftOptionSendsMeta", KEYBOARD_GROUP, true},
+    {RightOptionSendsMeta, "RightOptionSendsMeta", KEYBOARD_GROUP, false},
 #else
     {KeyBindings, "KeyBindings", KEYBOARD_GROUP, QLatin1String("default")},
 #endif

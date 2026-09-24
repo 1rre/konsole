@@ -479,6 +479,12 @@ public:
          * so enabling this only makes the feature available.
          */
         KittyKeyboardEnabled,
+#ifdef Q_OS_MACOS
+        /** (bool) True if the left Option key acts as Meta */
+        LeftOptionSendsMeta,
+        /** (bool) True if the right Option key acts as Meta */
+        RightOptionSendsMeta,
+#endif
     };
 
     Q_ENUM(Property)

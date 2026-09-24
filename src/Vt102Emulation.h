@@ -85,6 +85,10 @@ public:
     void reset(bool softReset = false, bool preservePrompt = false) override;
     char eraseChar() const override;
 
+#ifdef Q_OS_MACOS
+    void setOptionKeySendsMeta(bool left, bool right);
+#endif
+
 public Q_SLOTS:
     // reimplemented from Emulation
     void sendString(const QByteArray &string) override;
@@ -255,6 +259,13 @@ private:
     bool _win32InputModeAvailable = true;
     bool _isRightCtrlPressed = false;
     bool _isRightAltPressed = false;
+
+#ifdef Q_OS_MACOS
+    bool optionKeySendsMeta(quint32 nativeModifiers) const;
+
+    bool _leftOptionSendsMeta = true;
+    bool _rightOptionSendsMeta = false;
+#endif
 
 protected:
     virtual void reportDecodingError(int token);

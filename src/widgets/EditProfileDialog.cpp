@@ -1720,6 +1720,20 @@ void EditProfileDialog::setupKeyboardPage(const Profile::Ptr & /* profile */)
     connect(_keyboardUi->editKeyBindingsButton, &QPushButton::clicked, this, &Konsole::EditProfileDialog::editKeyBinding);
     connect(_keyboardUi->removeKeyBindingsButton, &QPushButton::clicked, this, &Konsole::EditProfileDialog::removeKeyBinding);
     connect(_keyboardUi->resetKeyBindingsButton, &QPushButton::clicked, this, &Konsole::EditProfileDialog::resetKeyBindings);
+
+#ifdef Q_OS_MACOS
+    _keyboardUi->leftOptionSendsMetaButton->setChecked(_profile->property<bool>(Profile::LeftOptionSendsMeta));
+    connect(_keyboardUi->leftOptionSendsMetaButton, &QCheckBox::toggled, this, [this](bool enable) {
+        updateTempProfileProperty(Profile::LeftOptionSendsMeta, enable);
+    });
+
+    _keyboardUi->rightOptionSendsMetaButton->setChecked(_profile->property<bool>(Profile::RightOptionSendsMeta));
+    connect(_keyboardUi->rightOptionSendsMetaButton, &QCheckBox::toggled, this, [this](bool enable) {
+        updateTempProfileProperty(Profile::RightOptionSendsMeta, enable);
+    });
+#else
+    _keyboardUi->optionKeyGroup->setVisible(false);
+#endif
 }
 
 void EditProfileDialog::keyBindingSelected()

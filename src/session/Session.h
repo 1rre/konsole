@@ -339,6 +339,17 @@ public:
     /** Returns the name of the key bindings used by this session. */
     QString keyBindings() const;
 
+#ifdef Q_OS_MACOS
+    /**
+     * Sets whether each Option key acts as Meta or produces the character
+     * the keyboard layout assigns to that combination.
+     *
+     * @param left True if the left Option key acts as Meta
+     * @param right True if the right Option key acts as Meta
+     */
+    void setOptionKeySendsMeta(bool left, bool right);
+#endif
+
     /**
      * This enum describes the available title roles.
      */

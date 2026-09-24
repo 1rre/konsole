@@ -112,6 +112,35 @@
      </layout>
     </widget>
    </item>
+   <item>
+    <widget class="QGroupBox" name="optionKeyGroup">
+     <property name="title">
+      <string comment="@title:group">Option Keys</string>
+     </property>
+     <layout class="QVBoxLayout">
+      <item>
+       <widget class="QCheckBox" name="leftOptionSendsMetaButton">
+        <property name="toolTip">
+         <string>Send Esc followed by the unmodified key, instead of the character the keyboard layout assigns to this combination</string>
+        </property>
+        <property name="text">
+         <string>Left Option sends Meta</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="rightOptionSendsMetaButton">
+        <property name="toolTip">
+         <string>Send Esc followed by the unmodified key, instead of the character the keyboard layout assigns to this combination</string>
+        </property>
+        <property name="text">
+         <string>Right Option sends Meta</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
   </layout>
  </widget>
  <tabstops>
@@ -120,6 +149,8 @@
   <tabstop>editKeyBindingsButton</tabstop>
   <tabstop>removeKeyBindingsButton</tabstop>
   <tabstop>resetKeyBindingsButton</tabstop>
+  <tabstop>leftOptionSendsMetaButton</tabstop>
+  <tabstop>rightOptionSendsMetaButton</tabstop>
  </tabstops>
  <resources/>
  <connections/>

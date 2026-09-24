@@ -154,6 +154,36 @@ void Vt102Emulation::setKittyKeyboardEnabled(bool enabled)
     _kittyKeyboardEnabled = enabled;
 }
 
+#ifdef Q_OS_MACOS
+// NSEvent device-dependent modifier flags, IOKit/hidsystem/IOLLEvent.h
+static constexpr quint32 LeftOptionMask = 0x00000020;
+static constexpr quint32 RightOptionMask = 0x00000040;
+
+void Vt102Emulation::setOptionKeySendsMeta(bool left, bool right)
+{
+    _leftOptionSendsMeta = left;
+    _rightOptionSendsMeta = right;
+}
+
+bool Vt102Emulation::optionKeySendsMeta(quint32 nativeModifiers) const
+{
+    if ((nativeModifiers & RightOptionMask) != 0U && (nativeModifiers & LeftOptionMask) == 0U) {
+        return _rightOptionSendsMeta;
+    }
+    return _leftOptionSendsMeta;
+}
+
+static QString baseCharacterForKey(const QKeyEvent *event)
+{
+    const int key = event->key();
+    if (key < Qt::Key_Space || key > Qt::Key_AsciiTilde) {
+        return event->text();
+    }
+    const QChar character{char16_t(key)};
+    return ((event->modifiers() & Qt::ShiftModifier) != 0U) ? QString(character) : QString(character.toLower());
+}
+#endif
+
 void Vt102Emulation::reset(bool softReset, bool preservePrompt)
 {
     Q_EMIT updateDroppedLines(_currentScreen->getLines());
@@ -2998,6 +3028,12 @@ void Vt102Emulation::sendKeyEvent(QKeyEvent *event)
         isReadOnly = currentView->getReadOnly();
     }
 
+#ifdef Q_OS_MACOS
+    if (((event->modifiers() & Qt::AltModifier) != 0U) && !event->text().isEmpty() && !optionKeySendsMeta(event->nativeModifiers())) {
+        event->setModifiers(event->modifiers() & ~Qt::AltModifier);
+    }
+#endif
+
 #ifdef HAVE_XKBCOMMON
     if (getMode(MODE_Win32Input) && _win32InputModeAvailable &&
         event->nativeScanCode() && !isReadOnly && (event->text().length() <= 1)) {
@@ -3327,7 +3363,13 @@ void Vt102Emulation::sendKeyEvent(QKeyEvent *event)
                 textToSend += entry.text(true, modifiers);
             } else {
                 Q_ASSERT(_encoder.isValid());
-                textToSend += _encoder.encode(event->text());
+                QString text = event->text();
+#ifdef Q_OS_MACOS
+                if ((modifiers & Qt::AltModifier) != 0U) {
+                    text = baseCharacterForKey(event);
+                }
+#endif
+                textToSend += _encoder.encode(text);
             }
         }
 

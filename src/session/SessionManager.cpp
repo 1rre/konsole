@@ -293,6 +293,12 @@ void SessionManager::applyProfile(Session *session, const Profile::Ptr &profile,
         session->setKittyKeyboardEnabled(profile->property<bool>(Profile::KittyKeyboardEnabled));
     }
 
+#ifdef Q_OS_MACOS
+    if (apply.shouldApply(Profile::LeftOptionSendsMeta) || apply.shouldApply(Profile::RightOptionSendsMeta)) {
+        session->setOptionKeySendsMeta(profile->property<bool>(Profile::LeftOptionSendsMeta), profile->property<bool>(Profile::RightOptionSendsMeta));
+    }
+#endif
+
     // Encoding
     if (apply.shouldApply(Profile::DefaultEncoding)) {
         session->setCodec(profile->defaultEncoding().toUtf8());

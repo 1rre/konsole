@@ -765,6 +765,89 @@ void Vt102EmulationTest::testKittyKeyboardTextKeys()
     }
 }
 
+void Vt102EmulationTest::testMacOptionKeyLegacy()
+{
+#ifndef Q_OS_MACOS
+    QSKIP("Option key behaviour only applies on macOS");
+#else
+    constexpr quint32 leftOption = 0x20;
+    constexpr quint32 rightOption = 0x40;
+
+    TestEmulation em;
+    em.reset();
+    em.setCodec(TestEmulation::Utf8Codec);
+    em.setKeyBindings(QString());
+
+    QByteArray sent;
+    connect(&em, &Konsole::Emulation::sendData, &em, [&sent](const QByteArray &data) {
+        sent = data;
+    });
+
+    // Left Option as Meta → Esc + base key, discarding the composed character
+    em.setOptionKeySendsMeta(true, false);
+    QKeyEvent leftMetaF(QEvent::KeyPress, Qt::Key_F, Qt::AltModifier, 0, 0, leftOption, QStringLiteral("ª"));
+    em.sendKeyEvent(&leftMetaF);
+    QCOMPARE(sent, QByteArray("\033f"));
+
+    // Right Option composing → the layout character, no Esc
+    QKeyEvent rightComposeQ(QEvent::KeyPress, Qt::Key_Q, Qt::AltModifier, 0, 0, rightOption, QStringLiteral("@"));
+    em.sendKeyEvent(&rightComposeQ);
+    QCOMPARE(sent, QByteArray("@"));
+
+    // Right Option as Meta → Esc q
+    em.setOptionKeySendsMeta(true, true);
+    QKeyEvent rightMetaQ(QEvent::KeyPress, Qt::Key_Q, Qt::AltModifier, 0, 0, rightOption, QStringLiteral("@"));
+    em.sendKeyEvent(&rightMetaQ);
+    QCOMPARE(sent, QByteArray("\033q"));
+
+    // Left Option composing → multi-byte layout character
+    em.setOptionKeySendsMeta(false, true);
+    QKeyEvent leftComposeF(QEvent::KeyPress, Qt::Key_F, Qt::AltModifier, 0, 0, leftOption, QStringLiteral("ª"));
+    em.sendKeyEvent(&leftComposeF);
+    QCOMPARE(sent, QStringLiteral("ª").toUtf8());
+
+    // Shift + Meta → Esc + upper case base key
+    em.setOptionKeySendsMeta(true, true);
+    QKeyEvent leftShiftF(QEvent::KeyPress, Qt::Key_F, Qt::AltModifier | Qt::ShiftModifier, 0, 0, leftOption, QStringLiteral("Ū"));
+    em.sendKeyEvent(&leftShiftF);
+    QCOMPARE(sent, QByteArray("\033F"));
+#endif
+}
+
+void Vt102EmulationTest::testMacOptionKeyKitty()
+{
+#ifndef Q_OS_MACOS
+    QSKIP("Option key behaviour only applies on macOS");
+#else
+    constexpr quint32 rightOption = 0x40;
+
+    TestEmulation em;
+    em.reset();
+    em.setCodec(TestEmulation::Utf8Codec);
+    em.setKeyBindings(QString());
+
+    QByteArray sent;
+    connect(&em, &Konsole::Emulation::sendData, &em, [&sent](const QByteArray &data) {
+        sent = data;
+    });
+
+    const char push1[] = "\033[>1u";
+    em.receiveData(push1, sizeof(push1) - 1);
+
+    QKeyEvent rightQ(QEvent::KeyPress, Qt::Key_Q, Qt::AltModifier, 0, 0, rightOption, QStringLiteral("@"));
+
+    // Right Option as Meta → CSI 113;3u
+    em.setOptionKeySendsMeta(true, true);
+    em.sendKeyEvent(&rightQ);
+    QCOMPARE(em.lastSent, QByteArray("\033[113;3u"));
+
+    // Right Option composing → no alt bit, so falls through to legacy
+    em.setOptionKeySendsMeta(true, false);
+    em.sendKeyEvent(&rightQ);
+    QCOMPARE(sent, QByteArray("@"));
+#endif
+}
+
 QTEST_GUILESS_MAIN(Vt102EmulationTest)
 
 #include "moc_Vt102EmulationTest.cpp"
