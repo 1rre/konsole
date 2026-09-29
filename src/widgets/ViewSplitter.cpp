@@ -196,8 +196,13 @@ void ViewSplitter::addTerminalDisplay(TerminalDisplay *terminalDisplay, Qt::Orie
         newSplitter->addWidget(behavior == AddBehavior::AddBefore ? terminalWidget : oldTerminalWidget);
         newSplitter->addWidget(behavior == AddBehavior::AddBefore ? oldTerminalWidget : terminalWidget);
         newSplitter->setOrientation(containerOrientation);
+#ifdef Q_OS_MACOS
+        splitter->insertWidget(oldContainerIndex, newSplitter);
+        newSplitter->show();
+#else
         newSplitter->show();
         splitter->insertWidget(oldContainerIndex, newSplitter);
+#endif
         splitter->m_blockPropagatedDeletion = false;
         splitter->setSizes(sizes);
         newSplitter->updateSizes();

@@ -807,7 +807,7 @@ void TabbedViewContainer::updateActivity(ViewProperties *item)
     auto topLevelSplitter = topLevelSplitterForDisplay(controller->view());
 
     const int index = indexOf(topLevelSplitter);
-    if (index != currentIndex()) {
+    if (index >= 0 && index != currentIndex()) {
         setTabActivity(index, true);
     }
 }
